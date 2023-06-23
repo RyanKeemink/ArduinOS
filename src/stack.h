@@ -3,22 +3,24 @@
 #include <Arduino.h>
 
 
-#define STACKSIZE 32
+#define STACKSIZE 20
 
 class stacks {
         char stack[STACKSIZE];
-        int stackPointer = 0;
+        uint8_t stackPointer = 0;
 
     public:
 
         char* popVar() {
             char type = this->popByte();
-            Serial.println(type);
             int16_t length = 0;
             if (type == 's'){
-                char lengthC[2]; 
-                lengthC[0] = this->popByte();
+                char lengthC[3]; 
+                lengthC[2] = this->popByte();
                 lengthC[1] = this->popByte();
+                lengthC[0] = this->popByte();
+
+                
                 length = chartoint16(lengthC);
 
             }
@@ -33,19 +35,20 @@ class stacks {
             }
             length +=2;
             char* var = new char[length];
-            var[0] = type;
-            var[length] = '\0';
             
-            for (int i = length -1; i > 0; i--) {
+            var[0] = type;
+            var[length-1] = '\0';
+            for (int i = length -2; i > 0; i--) {
                 var[i] = this->popByte();
+                
             }
             return var;
         }
 
         void pushVar(char* var) {
+            
             char type = var[0];
             int16_t length = 1;
-            
             if (type == 'c'){
                 length += 1;
             }
@@ -53,26 +56,25 @@ class stacks {
                 length += 2;
             }
             else if (type == 'f') {
+                
                 length += 4;
             }
             else if (type == 's') {
                 while ( var[length] != '\0') {
                 length++;
+                }
+                
             }
-            Serial.print("length ");
-            Serial.println(var);
-            Serial.println(length);
-            Serial.println(type);
-            }
-            for (int i = 0; i < length; i++){
+            for (int i = 1; i < length; i++){
                 pushByte(var[i]);
             }
             
             if (type == 's') {
-                char* lengthC;
-                lengthC = int16toChar(length);
+                char* lengthC = int16toChar(length -1) ;
                 pushByte(lengthC[0]);
                 pushByte(lengthC[1]);
+                pushByte(lengthC[2]);
+            
                 
             }
             pushByte(type);
@@ -81,15 +83,17 @@ class stacks {
 
     private:
         void pushByte(char byte) {
-            stack[stackPointer] = byte;
-            stackPointer++;
+            this->stack[stackPointer] = byte;
+            this->stackPointer++;
         }
 
         char popByte() {
-            stackPointer--;
-            return stack[stackPointer];
+            this->stackPointer--;
+            return this->stack[stackPointer];
         }
 };
+
+
 
 
 

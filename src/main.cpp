@@ -9,48 +9,71 @@
 
 
 
-
+static char input[150];
 typedef struct {
-    char name[12];
+    char name[10];
     void (*function)();
 } Commands;
 
 
-
+char invalid[]  = "Invalid command";
 
 void store() {
     char* fileName = strtok(NULL, " \n");
     int fileSize = atoi(strtok(NULL, " \n"));
-    char* data = strtok(NULL, " \n");
+    int dataindex = 0;
+    int spaces = 0;
+   
+    for ( dataindex = 0; dataindex < 150; dataindex++) {
+        
+        if (input[dataindex] == NULL){
+            if (spaces ==2){
+                break;
+                
+            }
+            spaces++;
+            
+        }
+    }
+   dataindex++;
+   
+    
+
+    char data[fileSize+2];
+    for (int i = 0; i < fileSize+2; i++) {
+        data[i] = input[dataindex++];
+    }
+    
+    
 
     if (fileExists(fileName)) {
-        Serial.println("File already exists");
+        Serial.println(F("File already exists"));
         return;
     }
     if (fileName == NULL || fileSize == 0 || data == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: store <fileName> <fileSize> <data>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: store <fileName> <fileSize> <data>"));
         return;
     }
     int succes = storeFile(fileName, fileSize, data);
     if (succes) {
-        Serial.println("File stored succesfully");
+        Serial.println(F("File stored succesfully"));
     } else {
-        Serial.println("Not enough space on device");
+        Serial.println(F("Not enough space on device"));
     }
 }
 
 void retreive(){
   char* fileName = strtok(NULL, " \n");
   if (fileName == NULL) {
-    Serial.println("Invalid arguments");
-    Serial.println("Usage: retreive <fileName>");
+    Serial.println(invalid);
+    Serial.println(F("Usage: retreive <fileName>"));
     return;
   }
 
   char* data = retreiveFile(fileName);
   if (data == NULL) {
-    Serial.println("File not found");
+    Serial.println(F("File not found"));
     return;
   }
 
@@ -62,34 +85,34 @@ void retreive(){
 void erase() {
     char* fileName = strtok(NULL, " \n");
     if (fileName == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: erase <fileName>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: erase <fileName>"));
         return;
     }
     int succes = eraseFile(fileName);
     if (succes) {
-        Serial.println("File erased succesfully");
+        Serial.println(F("File erased succesfully"));
     } else {
-        Serial.println("File not found");
+        Serial.println(F("File not found"));
     }
 }
 
 void Files() {
     File file;
-    Serial.println("FileName FileSize StartAddress");
+    Serial.println(F("FileName FileSize StartAddress"));
     for (int i = 0; i < noOfFiles; i++) {
         int index = i * sizeof(File) +1;
         readFATEntry(&file, index);
         Serial.print(file.fileName);
-        Serial.print("     ");
+        Serial.print(F("     "));
         Serial.print(file.fileSize);
-        Serial.print("     ");
+        Serial.print(F("     "));
         Serial.println(file.startAddress);
     }
 }
 
 void freeSpace() {
-    Serial.print("Free space: ");
+    Serial.print(F("Free space: "));
     Serial.println(checkspace(0, true));
     
 }
@@ -97,8 +120,8 @@ void freeSpace() {
 void run() {
     char* fileName = strtok(NULL, " \n");
     if (fileName == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: run <fileName>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: run <fileName>"));
         return;
     }
     startProcces(fileName);
@@ -114,8 +137,8 @@ void list() {
 void suspend() {
     int id = atoi(strtok(NULL, " \n"));
     if (id == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: suspend <procces id>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: suspend <procces id>"));
         return;
     }
     pauseProgramm(id);
@@ -123,8 +146,8 @@ void suspend() {
 void resume() {
     int id = atoi(strtok(NULL, " \n"));
     if (id == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: resume <procces id>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: resume <procces id>"));
         return;
     }
     resumeProgramm(id);
@@ -133,19 +156,21 @@ void kill() {
     int id = atoi(strtok(NULL, " \n"));
     
     if (id == NULL) {
-        Serial.println("Invalid arguments");
-        Serial.println("Usage: kill <procces id>");
+        Serial.println(invalid);
+        Serial.println(F("Usage: kill <procces id>"));
         return;
     }
     terminateProgram(id);
 }
 
-void test() { 
-    stacks stacker;
-    stacker.pushVar("saa");
-    Serial.print( stacker.popVar());
+void test(){
+
+
+    
+
 
 }
+
 
 static Commands commands[] = {
     {"store", &store},
@@ -162,7 +187,7 @@ static Commands commands[] = {
 };
 
 char* InputCheck() {
-    static char input[35];
+    
     static int length;
     if (Serial.available()) {
       input[length] = Serial.read();
@@ -187,19 +212,18 @@ void runCommand(char* input) {
         }
       }
       if (!found) {
-        Serial.println("Command not found");
+        Serial.println(F("Command not found"));
       }
       
-      Serial.print("ArduinOS> ");
+      Serial.print(F("ArduinOS> "));
 }
 
 void setup() {
-    
     Serial.begin(9600);
-    Serial.println("###########################");
-    Serial.println("Welcome to the ArduinOS!");
-    Serial.println("###########################");
-    Serial.print("ArduinOS> ");
+    Serial.println(F("###########################"));
+    Serial.println(F("Welcome to the ArduinOS!"));
+    Serial.println(F("###########################"));
+    Serial.print(F("ArduinOS> "));
 }
 
 void loop() {
@@ -207,7 +231,9 @@ void loop() {
     if (input != NULL) {
       runCommand(input);
     }
+    
     runprocesses();
-
+    delay(1);
+    
 
 }

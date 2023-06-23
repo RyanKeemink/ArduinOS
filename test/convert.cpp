@@ -10,8 +10,8 @@ std::unordered_map<std::string, std::vector<int>> commands = {
     {"INT", {0x02, 2}},
     {"FLOAT", {0x03, 4}},
     {"STRING", {0x04, -1}},
-    {"SET", {0x05, 1}},
-    {"GET", {0x06, 1}},
+    {"SET", {0x05, -2}},
+    {"GET", {0x06, -2}},
     {"INCREMENT", {0x07, 0}},
     {"DECREMENT", {0x08, 0}},
     {"PLUS", {0x09, 0}},
@@ -67,7 +67,7 @@ std::unordered_map<std::string, std::vector<int>> commands = {
     {"IF", {0x3B, 1}},
     {"ELSE", {0x3C, 1}},
     {"ENDIF", {0x3D, 0}},
-    {"WHILE", {0x3E, 1}},
+    {"WHILE", {0x3E, 2}},
     {"ENDWHILE", {0x3F, 0}},
     {"LOOP", {0x40, 0}},
     {"ENDLOOP", {0x41, 0}},
@@ -78,9 +78,9 @@ std::unordered_map<std::string, std::vector<int>> commands = {
 
 int main() {
     std::string filename = "test.txt";
-    std::string port = "COM10";
+    std::string port = "\\\\.\\COM10";
 
-    HANDLE serial = CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE serial = CreateFile("\\\\.\\COM11", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (serial == INVALID_HANDLE_VALUE) {
         std::cout << "Failed to open serial port." << std::endl;
         return 1;
@@ -103,25 +103,69 @@ int main() {
         CloseHandle(serial);
         return 1;
     }
-
+    
     std::string line;
-    std::ifstream openFile(filename);
+    std::ifstream openFile("fork.txt");
     if (openFile.is_open()) {
+        
         std::vector<char> byteList;
-        openfile.get
+        int counter = 0;
+        while (openFile.eof() == false){
+            
 
-        openFile.close();
+            getline(openFile, line, ' ');
+            if(counter > 0){
+                byteList.push_back(atoi(line.c_str()));
+                counter--;
+            }
+            else if(counter == -1){
+                if( line == "0"){
+                 
+                    byteList.push_back(0);
+                    counter = 0;
+                }
+                else{
+                    byteList.push_back(line[1]);
+                }
+            }
+            else if (counter == -2){
+                byteList.push_back(line[1]);
+                counter = 0;
+            }
+            else {
+                if (commands.find(line) != commands.end()) {
+                    byteList.push_back(commands[line][0]);
+                    counter = commands[line][1];
+                }
+            }
+            
 
-        std::string command = "store test5 " + std::to_string(byteList.size() + 1) + " ";
+        }
+        
+        
+        for (int byte : byteList) {
+            printf("%d ", byte);
+        }
+        
+        Sleep(5000);
+        byteList.push_back(0x66);
+        byteList.push_back(' ');
+        byteList.push_back('\n');
+        std::string command = "store fork2 " + std::to_string(byteList.size() -2) + " ";
+        printf("Size: %d\n", byteList.size());
         DWORD bytesWritten;
         WriteFile(serial, command.c_str(), command.size(), &bytesWritten, NULL);
         for (int byte : byteList) {
             WriteFile(serial, &byte, 1, &bytesWritten, NULL);
+            Sleep(15);
         }
         std::cout << "Data sent." << std::endl;
     } else {
         std::cout << "Failed to open file." << std::endl;
     }
+    Sleep(1000);
+    ReadFile(serial, &line, 1, NULL, NULL);
+    printf("%s", line);
 
     CloseHandle(serial);
     return 0;

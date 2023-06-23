@@ -5,31 +5,33 @@
 #include "dataStorage.h"
 
 typedef struct {
-    char name[12];
-    int id;
-    int pc; //tracker
-    int la; //start adress
-    stacks stack = stacks();
-    char status;
-
+    char name[10];
+    uint8_t id;
+    uint16_t pc; //tracker
+    uint16_t FP; //start adress
+    uint16_t lr;
+    stacks stack;
+    uint8_t status;
 } Processes;
 
-Processes *proccessesList = new Processes[10];
-int noOfProccesses = 0;
-int id = 0;
+Processes proccessesList[10];
+uint8_t noOfProccesses = 0;
+uint8_t id = 1;
 
 void addProcces(Processes pro){
     proccessesList[noOfProccesses] = pro;
-    noOfProccesses++;
+    noOfProccesses++;  
 }
 
 void startProcces(char name[12]){
+    Serial.println("Starting proccess");
     File file;
     if (fileExists(&file, name)){
+        
         Processes proccess;
         proccess.id = id++;
         proccess.pc = file.startAddress;
-        proccess.la = file.startAddress;
+        proccess.FP = file.startAddress;
         proccess.status = 'r';
         strcpy(proccess.name, name);
         
@@ -57,6 +59,14 @@ void terminateProgram(int id){
     noOfProccesses--;
 }
 
+char programStatus(int id){
+    for (int i = 0; i < noOfProccesses; i++){
+        if (proccessesList[i].id == id){
+            return proccessesList[i].status;
+        }
+    }
+}
+
 void pauseProgramm(int id){
     for (int i = 0; i < noOfProccesses; i++){
         if (proccessesList[i].id == id){
@@ -81,10 +91,10 @@ void printProccesses(){
         Serial.println(proccessesList[i].id);
         Serial.print("PC: ");
         Serial.println(proccessesList[i].pc);
-        Serial.print("LA: ");
-        Serial.println(proccessesList[i].la);
+        Serial.print("FP: ");
+        Serial.println(proccessesList[i].FP);
         Serial.print("Status: ");
-        Serial.println(proccessesList[i].status);
+        Serial.println(char(proccessesList[i].status));
         Serial.println();
     }
 }

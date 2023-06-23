@@ -6,7 +6,7 @@
 EERef noOfFiles = EEPROM[0];
 
 typedef struct {
-    char fileName[12];
+    char fileName[10];
     int fileSize;
     int startAddress;
 } File;
@@ -22,7 +22,8 @@ File readFATEntry(File* file, int index) {
 }
 
 void removeFATEntry(File file) {
-    File* files = new File[noOfFiles];
+    int amount = noOfFiles * 1;
+    File files[amount];
     for (int i = 0; i < noOfFiles; i++) {
         int index = i * sizeof(File) +1;
         readFATEntry(&files[i], index);
@@ -75,12 +76,13 @@ int checkspace(int size, bool getbig = false){
         endAdresses[i+1] = file.startAddress + file.fileSize;
     }
 
-    startAdresses = sortArray(startAdresses, noOfFiles + 1);
-    endAdresses = sortArray(endAdresses, noOfFiles + 1);
+    sortArray(startAdresses, noOfFiles + 1);
+    sortArray(endAdresses, noOfFiles + 1);
+
 
     if (getbig) {
         int biggestSize = 0;
-        for (int i = 0; i < sizeof(startAdresses)/sizeof(int) ; i++) {
+        for (int i = 0; i < noOfFiles + 1 ; i++) {
             if (startAdresses[i] - endAdresses[i] > biggestSize) {
                 biggestSize = startAdresses[i] - endAdresses[i];
             }
@@ -90,7 +92,7 @@ int checkspace(int size, bool getbig = false){
     
     int adress = -1;
     int smallestSize = totalSize;
-    for (int i = 0; i <= sizeof(startAdresses); i++) {
+    for (int i = 0; i < noOfFiles + 1; i++) {
         if (startAdresses[i] - endAdresses[i] >= size) {
             if (startAdresses[i] - endAdresses[i] < smallestSize) {
                 smallestSize = startAdresses[i+1] - endAdresses[i];
@@ -114,7 +116,7 @@ int storeFile(char* fileName, int size, char* data) {
     for (int i = 0; i < size; i++) {
         EEPROM.put(file.startAddress + i, data[i]);
     }
-    return 1;
+    return file.startAddress;
 }
 
 char* retreiveFile(char* fileName) {
@@ -126,7 +128,9 @@ char* retreiveFile(char* fileName) {
     int startAddress = file.startAddress;
     char* data = new char[dataLength];
     for (int i = 0; i < dataLength; i++) {
+        
         EEPROM.get(startAddress + i, data[i]);
+        
     }
     data[dataLength] = '\0';
     
