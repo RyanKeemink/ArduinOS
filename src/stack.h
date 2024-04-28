@@ -7,10 +7,10 @@
 
 class stacks {
         char stack[STACKSIZE];
-        uint8_t stackPointer = 0;
+        
 
     public:
-
+        uint8_t stackPointer = 0;
         char* popVar() {
             char type = this->popByte();
             int16_t length = 0;
