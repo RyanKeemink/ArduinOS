@@ -77,10 +77,10 @@ std::unordered_map<std::string, std::vector<int>> commands = {
 };
 
 int main() {
-    std::string filename = "test.txt";
-    std::string port = "\\\\.\\COM10";
+    std::string filename = "IF.txt";
+    std::string port = "\\\\.\\COM5";
 
-    HANDLE serial = CreateFile("\\\\.\\COM11", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    HANDLE serial = CreateFile("\\\\.\\COM5", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (serial == INVALID_HANDLE_VALUE) {
         std::cout << "Failed to open serial port." << std::endl;
         return 1;
@@ -105,7 +105,7 @@ int main() {
     }
     
     std::string line;
-    std::ifstream openFile("fork.txt");
+    std::ifstream openFile("IF.txt");
     if (openFile.is_open()) {
         
         std::vector<char> byteList;
@@ -151,7 +151,7 @@ int main() {
         byteList.push_back(0x66);
         byteList.push_back(' ');
         byteList.push_back('\n');
-        std::string command = "store fork2 " + std::to_string(byteList.size() -2) + " ";
+        std::string command = "store IF2 " + std::to_string(byteList.size() -2) + " ";
         printf("Size: %d\n", byteList.size());
         DWORD bytesWritten;
         WriteFile(serial, command.c_str(), command.size(), &bytesWritten, NULL);

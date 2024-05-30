@@ -164,6 +164,10 @@ void kill() {
 }
 
 void test(){
+    EERef noOfFiles = EEPROM[0];
+    noOfFiles = 0;
+
+
 
 
     
