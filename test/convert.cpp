@@ -77,10 +77,10 @@ std::unordered_map<std::string, std::vector<int>> commands = {
 };
 
 int main() {
-    std::string filename = "IF.txt";
-    std::string port = "\\\\.\\COM5";
+    std::string filename = "test.txt";
+    std::string port = "\\\\.\\COM10";
 
-    HANDLE serial = CreateFile("\\\\.\\COM5", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    HANDLE serial = CreateFile("\\\\.\\COM11", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (serial == INVALID_HANDLE_VALUE) {
         std::cout << "Failed to open serial port." << std::endl;
         return 1;
@@ -147,9 +147,8 @@ int main() {
             printf("%d ", byte);
         }
         
-        Sleep(5000);
-        byteList.push_back(0x66);
-        byteList.push_back(' ');
+        Sleep(3000);
+        byteList.push_back(0x42);
         byteList.push_back('\n');
         std::string command = "store IF2 " + std::to_string(byteList.size() -2) + " ";
         printf("Size: %d\n", byteList.size());
@@ -163,7 +162,7 @@ int main() {
     } else {
         std::cout << "Failed to open file." << std::endl;
     }
-    Sleep(1000);
+    Sleep(3000);
     ReadFile(serial, &line, 1, NULL, NULL);
     printf("%s", line);
 

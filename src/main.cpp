@@ -71,12 +71,21 @@ void retreive(){
     return;
   }
 
+  File file;
+    if (!fileExists(&file, fileName)) {
+        Serial.println(F("File not found"));
+        return;
+    }
+  int fileSize = file.fileSize;
   char* data = retreiveFile(fileName);
   if (data == NULL) {
     Serial.println(F("File not found"));
     return;
   }
-
+  for (int i = 0; i < fileSize; i++) {
+    Serial.print((int)data[i]);
+    Serial.print(" ");
+  }
   Serial.println((char*)data);
     
 
@@ -224,6 +233,7 @@ void runCommand(char* input) {
 
 void setup() {
     Serial.begin(9600);
+ 
     Serial.println(F("###########################"));
     Serial.println(F("Welcome to the ArduinOS!"));
     Serial.println(F("###########################"));
@@ -237,7 +247,7 @@ void loop() {
     }
     
     runprocesses();
-    delay(1);
+    delay(50);
     
 
 }
