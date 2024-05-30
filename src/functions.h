@@ -11,6 +11,7 @@ typedef struct {
 } functions;
 
 void STOP(Processes* pro){
+    Serial.println("STOP");
     pro->status = 't';
 }
 
@@ -925,6 +926,7 @@ void DELAY(Processes* pro){
 }
 
 void DELAYUNTIL(Processes* pro){
+    Serial.println(pro->stack.stackPointer);
     char* value = pro->stack.popVar();
     char type = value[0];
     if(type == 'i'){
@@ -1258,9 +1260,6 @@ void runprocesses(){;
             
             
             char call = EEPROM.read(proccessesList[i].pc++);
-            Serial.print(F("Running: "));
-            Serial.println((int)call);
-            
             for (int j = 0; j < sizeof(functionList)/sizeof(functions); j++){
                 if (call == functionList[j].name){
                     
